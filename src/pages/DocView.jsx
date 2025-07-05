@@ -11,6 +11,9 @@ import Loader from '../components/Loader';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js`;
 
+// ✅ Backend URL (dynamic for dev/prod)
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://signature-server-5olu.onrender.com';
+
 const DocView = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -23,11 +26,12 @@ const DocView = () => {
   const [signatures, setSignatures] = useState([]);
   const [finalPdfBlob, setFinalPdfBlob] = useState(null);
 
+  // ✅ Fetch Document on Load
   useEffect(() => {
     const fetchDocument = async () => {
       try {
         const res = await API.get(`/docs/${id}`);
-        setDocUrl(`http://localhost:5000/${res.data.filePath.replace(/\\/g, '/')}`);
+        setDocUrl(`${BASE_URL}/${res.data.filePath.replace(/\\/g, '/')}`);
       } catch (err) {
         console.error('Error fetching document:', err);
         setToast({ message: 'Failed to load document.', type: 'error' });
@@ -59,9 +63,11 @@ const DocView = () => {
   };
 
   const updateSignature = (id, newData) => {
-    setSignatures((prev) =>
-      prev.map((sig) => (sig.id === id ? { ...sig, ...newData } : sig))
-    );
+    setSignatures((prev) => prev.map((sig) => (sig.id === id ? { ...sig, ...newData } : sig)));
+  };
+
+  const deleteSignature = (id) => {
+    setSignatures((prev) => prev.filter((s) => s.id !== id));
   };
 
   const handleSaveSignature = async () => {
@@ -137,9 +143,7 @@ const DocView = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 p-4 sm:p-6">
-      {toast && (
-        <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
-      )}
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl sm:text-2xl font-bold text-gray-800">📄 Document Viewer</h2>
@@ -170,9 +174,7 @@ const DocView = () => {
                     {...sig}
                     onDragEnd={(e) => handleDragEnd(e, sig.id)}
                     onUpdate={(data) => updateSignature(sig.id, data)}
-                    onDelete={() =>
-                      setSignatures((prev) => prev.filter((s) => s.id !== sig.id))
-                    } // ✅ PASS onDelete to SignatureBox
+                    onDelete={() => deleteSignature(sig.id)} // ✅ Pass delete function
                   />
                 ))}
             </div>
