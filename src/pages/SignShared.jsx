@@ -18,7 +18,7 @@ const SignShared = () => {
       try {
         const res = await API.get(`/shared/${token}`);
         const filePath = res.data.filePath.replace(/\\/g, '/');
-        setDocUrl(`http://localhost:5000/${filePath}`);
+        setDocUrl(`https://signature-server-5olu.onrender.com/${filePath}`);
       } catch (err) {
         console.error('Link error:', err);
         setError('❌ This signing link is invalid or expired.');
@@ -63,7 +63,7 @@ const SignShared = () => {
     return (
       <div className="text-center mt-10">
         <h2 className="text-green-600 text-2xl font-semibold">✅ PDF Signed Successfully!</h2>
-        <p className="text-gray-700 mt-2">You may now close this window.</p>
+        <p className="text-gray-700 mt-2">You may now close this window or return to the app.</p>
       </div>
     );
   }
@@ -73,9 +73,12 @@ const SignShared = () => {
       <h2 className="text-2xl font-bold mb-4 text-gray-800">📄 Review & Sign Document</h2>
 
       {docUrl ? (
-        <div className="inline-block bg-white p-4 rounded shadow">
+        <div className="inline-block bg-white p-4 rounded shadow max-w-full overflow-x-auto">
           <Document file={docUrl}>
-            <Page pageNumber={1} width={600} />
+            <Page
+              pageNumber={1}
+              width={window.innerWidth < 768 ? 320 : 600}
+            />
           </Document>
         </div>
       ) : (
@@ -85,7 +88,7 @@ const SignShared = () => {
       <button
         onClick={handleFinalize}
         disabled={loading}
-        className={`mt-6 px-6 py-2 rounded text-white ${
+        className={`mt-6 px-6 py-2 rounded text-white transition ${
           loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'
         }`}
       >
@@ -96,4 +99,5 @@ const SignShared = () => {
 };
 
 export default SignShared;
+
 
