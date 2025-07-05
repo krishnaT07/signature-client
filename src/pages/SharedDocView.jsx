@@ -30,7 +30,7 @@ const SharedDocView = () => {
         const res = await API.get(`/shared/${token}`);
         const filePath = res.data.filePath;
         setDocumentId(res.data.documentId);
-        setDocUrl(`http://localhost:5000/${filePath.replace(/\\/g, '/')}`);
+        setDocUrl(`https://signature-server-5olu.onrender.com/${filePath.replace(/\\/g, '/')}`);
       } catch (err) {
         console.error('Token validation error:', err);
         setIsUsed(true);
@@ -104,7 +104,7 @@ const SharedDocView = () => {
       }
 
       await API.post(`/shared/finalize/${token}`, {
-        signatureDetails: signatures[0], // just send first one for shared finalize
+        signatureDetails: signatures[0] || {},
       });
 
       setToast({ message: '✅ Document signed and finalized', type: 'success' });
@@ -154,12 +154,14 @@ const SharedDocView = () => {
                   {...sig}
                   onDragEnd={(e) => handleDragEnd(e, sig.id)}
                   onUpdate={(data) => updateSignature(sig.id, data)}
+                  onDelete={() =>
+                    setSignatures((prev) => prev.filter((s) => s.id !== sig.id))
+                  }
                 />
               ))}
           </div>
         </Document>
 
-        {/* Page Navigation */}
         <div className="flex justify-between items-center mt-4">
           <button
             onClick={goToPrevPage}
@@ -180,7 +182,6 @@ const SharedDocView = () => {
           </button>
         </div>
 
-        {/* Signature + Finalize */}
         <div className="mt-6 flex flex-wrap gap-3">
           <button
             onClick={addSignature}
