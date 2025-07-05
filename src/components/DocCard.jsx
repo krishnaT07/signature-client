@@ -7,7 +7,7 @@ import StatusBadge from './StatusBadge';
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js`;
 
 // ✅ Correct backend base URL
-const BaseURL = 'https://signature-server-5olu.onrender.com';
+const backendBaseURL = 'https://signature-server-5olu.onrender.com';
 
 const DocCard = ({ doc, onDelete }) => {
   const navigate = useNavigate();
@@ -21,7 +21,7 @@ const DocCard = ({ doc, onDelete }) => {
 
   const handleDownload = () => {
     if (doc.finalPath) {
-      const url = `${BaseURL}/${doc.finalPath.replace(/\\/g, '/')}`;
+      const url = `${backendBaseURL}/${doc.finalPath.replace(/\\/g, '/')}`;
       const link = document.createElement('a');
       link.href = url;
       link.download = doc.name || doc.originalName || 'document.pdf';
