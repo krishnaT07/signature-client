@@ -12,7 +12,7 @@ import Loader from '../components/Loader';
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js`;
 
 // ✅ Backend URL (dynamic for dev/prod)
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://signature-server-5olu.onrender.com';
+const  baseURL: 'https://signature-server-5olu.onrender.com/api',
 
 const DocView = () => {
   const { id } = useParams();
