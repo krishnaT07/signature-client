@@ -6,8 +6,8 @@ import StatusBadge from './StatusBadge';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js`;
 
-// ✅ Set base URL based on environment
- const backendBaseURL = 'https://signature-server-5olu.onrender.com';
+// ✅ Correct backend base URL
+const backendBaseURL = 'https://signature-server-5olu.onrender.com';
 
 const DocCard = ({ doc, onDelete }) => {
   const navigate = useNavigate();
@@ -21,7 +21,7 @@ const DocCard = ({ doc, onDelete }) => {
 
   const handleDownload = () => {
     if (doc.finalPath) {
-      const url = `${BASE_URL}/${doc.finalPath.replace(/\\/g, '/')}`;
+      const url = `${backendBaseURL}/${doc.finalPath.replace(/\\/g, '/')}`;
       const link = document.createElement('a');
       link.href = url;
       link.download = doc.name || doc.originalName || 'document.pdf';
@@ -120,7 +120,7 @@ const DocCard = ({ doc, onDelete }) => {
             </div>
 
             <Document
-              file={`${BASE_URL}/${doc.filePath.replace(/\\/g, '/')}`}
+              file={`${backendBaseURL}/${doc.filePath.replace(/\\/g, '/')}`}
               onLoadSuccess={({ numPages }) => setNumPages(numPages)}
             >
               {Array.from(new Array(numPages), (_, i) => (
@@ -190,5 +190,6 @@ const DocCard = ({ doc, onDelete }) => {
 };
 
 export default DocCard;
+
 
 
