@@ -11,8 +11,8 @@ import Loader from '../components/Loader';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js`;
 
-// ✅ Backend URL (dynamic for dev/prod)
-const  baseURL: 'https://signature-server-5olu.onrender.com/api',
+// ✅ Backend base URL
+const baseURL = 'https://signature-server-5olu.onrender.com';
 
 const DocView = () => {
   const { id } = useParams();
@@ -26,12 +26,11 @@ const DocView = () => {
   const [signatures, setSignatures] = useState([]);
   const [finalPdfBlob, setFinalPdfBlob] = useState(null);
 
-  // ✅ Fetch Document on Load
   useEffect(() => {
     const fetchDocument = async () => {
       try {
         const res = await API.get(`/docs/${id}`);
-        setDocUrl(`${BASE_URL}/${res.data.filePath.replace(/\\/g, '/')}`);
+        setDocUrl(`${baseURL}/${res.data.filePath.replace(/\\/g, '/')}`);
       } catch (err) {
         console.error('Error fetching document:', err);
         setToast({ message: 'Failed to load document.', type: 'error' });
@@ -174,7 +173,7 @@ const DocView = () => {
                     {...sig}
                     onDragEnd={(e) => handleDragEnd(e, sig.id)}
                     onUpdate={(data) => updateSignature(sig.id, data)}
-                    onDelete={() => deleteSignature(sig.id)} // ✅ Pass delete function
+                    onDelete={() => deleteSignature(sig.id)}
                   />
                 ))}
             </div>
