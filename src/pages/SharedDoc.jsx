@@ -6,6 +6,9 @@ import Toast from '../components/Toast';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js`;
 
+// ✅ Backend URL
+const baseURL = 'https://signature-server-5olu.onrender.com';
+
 const SharedDoc = () => {
   const { token } = useParams();
   const navigate = useNavigate();
@@ -25,12 +28,18 @@ const SharedDoc = () => {
   const [error, setError] = useState('');
   const [finalized, setFinalized] = useState(false);
 
+  // ✅ Load PDF from token
   useEffect(() => {
     const verifyToken = async () => {
       try {
         const res = await API.get(`/shared/${token}`);
-        setFileUrl(`https://signature-server-5olu.onrender.com/${res.data.filePath.replace(/\\/g, '/')}`);
+        if (res.data?.filePath) {
+          setFileUrl(`${baseURL}/${res.data.filePath.replace(/\\/g, '/')}`);
+        } else {
+          setError('❌ No file found.');
+        }
       } catch (err) {
+        console.error('Token verification failed:', err);
         setError('❌ Invalid or expired link.');
       }
     };
@@ -38,14 +47,15 @@ const SharedDoc = () => {
     verifyToken();
   }, [token]);
 
+  // ✅ Finalize signature
   const handleFinalize = async () => {
     try {
       await API.post(`/shared/finalize/${token}`, { signatureDetails });
       setToast({ message: '✅ Document signed successfully.', type: 'success' });
       setFinalized(true);
-      setTimeout(() => navigate('/'), 2000); // redirect guest
+      setTimeout(() => navigate('/'), 2000);
     } catch (err) {
-      console.error(err);
+      console.error('Finalize error:', err);
       setToast({ message: '❌ Failed to finalize.', type: 'error' });
     }
   };
@@ -75,7 +85,6 @@ const SharedDoc = () => {
             </Document>
           </div>
 
-          {/* Signature Input */}
           {!finalized && (
             <div className="mt-6 max-w-lg w-full bg-white p-4 rounded shadow space-y-4">
               <h3 className="text-lg font-semibold text-gray-700">✍️ Sign Document</h3>
@@ -90,7 +99,7 @@ const SharedDoc = () => {
                 type="number"
                 value={signatureDetails.page}
                 onChange={(e) =>
-                  setSignatureDetails({ ...signatureDetails, page: parseInt(e.target.value) })
+                  setSignatureDetails({ ...signatureDetails, page: parseInt(e.target.value) || 1 })
                 }
                 min={1}
                 max={numPages}
@@ -100,14 +109,18 @@ const SharedDoc = () => {
               <input
                 type="number"
                 value={signatureDetails.x}
-                onChange={(e) => setSignatureDetails({ ...signatureDetails, x: parseInt(e.target.value) })}
+                onChange={(e) =>
+                  setSignatureDetails({ ...signatureDetails, x: parseInt(e.target.value) || 0 })
+                }
                 className="w-full border px-3 py-2 rounded"
                 placeholder="X position"
               />
               <input
                 type="number"
                 value={signatureDetails.y}
-                onChange={(e) => setSignatureDetails({ ...signatureDetails, y: parseInt(e.target.value) })}
+                onChange={(e) =>
+                  setSignatureDetails({ ...signatureDetails, y: parseInt(e.target.value) || 0 })
+                }
                 className="w-full border px-3 py-2 rounded"
                 placeholder="Y position"
               />
@@ -132,4 +145,5 @@ const SharedDoc = () => {
 };
 
 export default SharedDoc;
+
 
