@@ -23,11 +23,11 @@ const SharedSignPage = () => {
     const fetchSharedDoc = async () => {
       try {
         const res = await API.get(`/shared/${token}`);
-        const fileUrl = `http://localhost:5000/${res.data.filePath.replace(/\\/g, '/')}`;
+        const fileUrl = `https://signature-server-5olu.onrender.com/${res.data.filePath.replace(/\\/g, '/')}`;
         setDocUrl(fileUrl);
       } catch (err) {
         console.error(err);
-        setToast({ message: 'Invalid or expired link.', type: 'error' });
+        setToast({ message: '❌ Invalid or expired link.', type: 'error' });
       } finally {
         setLoading(false);
       }
@@ -66,7 +66,7 @@ const SharedSignPage = () => {
           fontFamily: signature.fontFamily,
           color: signature.color,
           userAgent: navigator.userAgent,
-          ipAddress: 'auto', // or capture from server side
+          ipAddress: 'auto',
           timestamp: new Date().toISOString(),
         }
       });
@@ -122,6 +122,7 @@ const SharedSignPage = () => {
                   {...signature}
                   onDragEnd={handleDragEnd}
                   onUpdate={(data) => setSignature({ ...signature, ...data })}
+                  onDelete={() => setSignature(null)}
                 />
               )}
             </div>
