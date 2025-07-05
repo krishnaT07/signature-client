@@ -3,27 +3,32 @@ import { useParams } from 'react-router-dom';
 import API from '../utils/api';
 import { Document, Page, pdfjs } from 'react-pdf';
 
+// Set the worker for PDF.js
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js`;
+
+// ✅ Backend base URL
+const BASE_URL = 'https://signature-server-5olu.onrender.com';
 
 const SignShared = () => {
   const { token } = useParams();
-
   const [docUrl, setDocUrl] = useState('');
   const [error, setError] = useState('');
   const [signed, setSigned] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    (async () => {
+    const fetchDocument = async () => {
       try {
         const res = await API.get(`/shared/${token}`);
         const filePath = res.data.filePath.replace(/\\/g, '/');
-        setDocUrl(`https://signature-server-5olu.onrender.com/${filePath}`);
+        setDocUrl(`${BASE_URL}/${filePath}`);
       } catch (err) {
         console.error('Link error:', err);
         setError('❌ This signing link is invalid or expired.');
       }
-    })();
+    };
+
+    fetchDocument();
   }, [token]);
 
   const handleFinalize = async () => {
@@ -43,6 +48,7 @@ const SignShared = () => {
           color: '#000000',
           timestamp: new Date().toISOString(),
           userAgent: navigator.userAgent,
+          ipAddress: 'auto',
         },
       });
 
@@ -55,10 +61,16 @@ const SignShared = () => {
     }
   };
 
+  // Error state
   if (error) {
-    return <p className="text-red-600 text-center mt-10 text-lg">{error}</p>;
+    return (
+      <p className="text-red-600 text-center mt-10 text-lg font-medium">
+        {error}
+      </p>
+    );
   }
 
+  // Signed success
   if (signed) {
     return (
       <div className="text-center mt-10">
@@ -78,17 +90,18 @@ const SignShared = () => {
             <Page
               pageNumber={1}
               width={window.innerWidth < 768 ? 320 : 600}
+              className="border"
             />
           </Document>
         </div>
       ) : (
-        <p className="text-gray-500">Loading PDF...</p>
+        <p className="text-gray-500 mt-4">Loading PDF...</p>
       )}
 
       <button
         onClick={handleFinalize}
         disabled={loading}
-        className={`mt-6 px-6 py-2 rounded text-white transition ${
+        className={`mt-6 px-6 py-2 rounded text-white font-semibold transition ${
           loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'
         }`}
       >
@@ -99,5 +112,6 @@ const SignShared = () => {
 };
 
 export default SignShared;
+
 
 
