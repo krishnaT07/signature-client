@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: 'https://signature-server-5olu.onrender.com',
+  baseURL: 'https://signature-server-5olu.onrender.com/api',
    withCredentials: true,
 });
 
