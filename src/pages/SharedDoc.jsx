@@ -1,4 +1,3 @@
-// /pages/SharedDoc.jsx
 import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
@@ -30,8 +29,7 @@ const SharedDoc = () => {
     const verifyToken = async () => {
       try {
         const res = await API.get(`/shared/${token}`);
-        setFileUrl(`http://localhost:5000/${res.data.filePath.replace(/\\/g, '/')}`);
-        // Removed: setDocumentId(res.data.documentId);
+        setFileUrl(`https://signature-server-5olu.onrender.com/${res.data.filePath.replace(/\\/g, '/')}`);
       } catch (err) {
         setError('❌ Invalid or expired link.');
       }
