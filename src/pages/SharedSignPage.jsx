@@ -8,6 +8,9 @@ import Toast from '../components/Toast';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js`;
 
+// ✅ Backend base URL
+const BASE_URL = 'https://signature-server-5olu.onrender.com';
+
 const SharedSignPage = () => {
   const { token } = useParams();
   const navigate = useNavigate();
@@ -16,14 +19,13 @@ const SharedSignPage = () => {
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState(null);
   const [signature, setSignature] = useState(null);
-  const [, setNumPages] = useState(1);
   const [signed, setSigned] = useState(false);
 
   useEffect(() => {
     const fetchSharedDoc = async () => {
       try {
         const res = await API.get(`/shared/${token}`);
-        const fileUrl = `https://signature-server-5olu.onrender.com/${res.data.filePath.replace(/\\/g, '/')}`;
+        const fileUrl = `${BASE_URL}/${res.data.filePath.replace(/\\/g, '/')}`;
         setDocUrl(fileUrl);
       } catch (err) {
         console.error(err);
@@ -52,6 +54,11 @@ const SharedSignPage = () => {
   };
 
   const handleFinalize = async () => {
+    if (!signature) {
+      setToast({ message: '⚠️ Please add a signature before finalizing.', type: 'warning' });
+      return;
+    }
+
     try {
       await API.post(`/shared/finalize/${token}`, {
         signatureDetails: {
@@ -68,12 +75,11 @@ const SharedSignPage = () => {
           userAgent: navigator.userAgent,
           ipAddress: 'auto',
           timestamp: new Date().toISOString(),
-        }
+        },
       });
 
       setToast({ message: '✅ Document signed successfully!', type: 'success' });
       setSigned(true);
-
       setTimeout(() => navigate('/'), 2000);
     } catch (err) {
       console.error(err);
@@ -113,7 +119,7 @@ const SharedSignPage = () => {
         <Loader />
       ) : docUrl ? (
         <div className="bg-white p-4 rounded shadow">
-          <Document file={docUrl} onLoadSuccess={({ numPages }) => setNumPages(numPages)}>
+          <Document file={docUrl}>
             <div className="relative pdf-container">
               <Page pageNumber={1} width={window.innerWidth < 768 ? 320 : 600} />
 
@@ -129,7 +135,7 @@ const SharedSignPage = () => {
           </Document>
 
           <div className="mt-4 space-x-3">
-            {!signature && (
+            {!signature && !signed && (
               <button
                 onClick={() => setSignature(defaultSignature)}
                 className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
@@ -149,10 +155,11 @@ const SharedSignPage = () => {
           </div>
         </div>
       ) : (
-        <p className="text-red-500 text-center">Invalid or expired signing link.</p>
+        <p className="text-red-500 text-center">❌ Invalid or expired signing link.</p>
       )}
     </div>
   );
 };
 
 export default SharedSignPage;
+
