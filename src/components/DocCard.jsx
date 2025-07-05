@@ -7,7 +7,7 @@ import StatusBadge from './StatusBadge';
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js`;
 
 // ✅ Set base URL based on environment
-const  baseURL: 'https://signature-server-5olu.onrender.com/api',
+ const backendBaseURL = 'https://signature-server-5olu.onrender.com';
 
 const DocCard = ({ doc, onDelete }) => {
   const navigate = useNavigate();
