@@ -11,6 +11,9 @@ import Toast from '../components/Toast';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js`;
 
+// ✅ Your Deployed Backend URL
+const BASE_URL = 'https://signature-server-5olu.onrender.com';
+
 const SharedDocView = () => {
   const { token } = useParams();
   const navigate = useNavigate();
@@ -30,11 +33,11 @@ const SharedDocView = () => {
         const res = await API.get(`/shared/${token}`);
         const filePath = res.data.filePath;
         setDocumentId(res.data.documentId);
-        setDocUrl(`https://signature-server-5olu.onrender.com/${filePath.replace(/\\/g, '/')}`);
+        setDocUrl(`${BASE_URL}/${filePath.replace(/\\/g, '/')}`);
       } catch (err) {
         console.error('Token validation error:', err);
         setIsUsed(true);
-        setToast({ message: 'Invalid or expired link ❌', type: 'error' });
+        setToast({ message: '❌ Invalid or expired link.', type: 'error' });
       } finally {
         setLoading(false);
       }
@@ -80,6 +83,11 @@ const SharedDocView = () => {
   };
 
   const handleFinalize = async () => {
+    if (!signatures.length) {
+      setToast({ message: '⚠️ Please add a signature first.', type: 'warning' });
+      return;
+    }
+
     try {
       for (const sig of signatures) {
         await API.post('/signatures', {
@@ -104,14 +112,14 @@ const SharedDocView = () => {
       }
 
       await API.post(`/shared/finalize/${token}`, {
-        signatureDetails: signatures[0] || {},
+        signatureDetails: signatures[0],
       });
 
-      setToast({ message: '✅ Document signed and finalized', type: 'success' });
+      setToast({ message: '✅ Document signed and finalized!', type: 'success' });
       setTimeout(() => navigate('/'), 2000);
     } catch (err) {
       console.error('Finalize error:', err);
-      setToast({ message: '❌ Failed to finalize document', type: 'error' });
+      setToast({ message: '❌ Failed to finalize document.', type: 'error' });
     }
   };
 
@@ -123,7 +131,7 @@ const SharedDocView = () => {
   if (isUsed) {
     return (
       <div className="p-8 text-center">
-        <h2 className="text-xl font-bold text-red-600">Link Expired or Invalid ❌</h2>
+        <h2 className="text-xl font-bold text-red-600">❌ Link Expired or Invalid</h2>
         <p className="mt-2 text-gray-700">This document is no longer accessible.</p>
       </div>
     );
