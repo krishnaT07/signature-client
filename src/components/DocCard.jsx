@@ -6,6 +6,9 @@ import StatusBadge from './StatusBadge';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js`;
 
+// ✅ Set base URL based on environment
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://signature-server-5olu.onrender.com';
+
 const DocCard = ({ doc, onDelete }) => {
   const navigate = useNavigate();
   const [showPreview, setShowPreview] = useState(false);
@@ -18,8 +21,9 @@ const DocCard = ({ doc, onDelete }) => {
 
   const handleDownload = () => {
     if (doc.finalPath) {
+      const url = `${BASE_URL}/${doc.finalPath.replace(/\\/g, '/')}`;
       const link = document.createElement('a');
-      link.href = `http://localhost:5000/${doc.finalPath.replace(/\\/g, '/')}`;
+      link.href = url;
       link.download = doc.name || doc.originalName || 'document.pdf';
       link.click();
     }
@@ -59,7 +63,7 @@ const DocCard = ({ doc, onDelete }) => {
 
     try {
       await API.delete(`/docs/${doc._id}`);
-      onDelete(); // Notify parent to remove this card
+      onDelete(); // Notify parent
     } catch (err) {
       console.error('Error deleting document:', err);
       alert('❌ Failed to delete document.');
@@ -69,7 +73,6 @@ const DocCard = ({ doc, onDelete }) => {
   return (
     <>
       <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all p-5 flex flex-col justify-between min-h-[240px]">
-        {/* Header */}
         <div className="mb-3">
           <h2 className="text-lg font-bold text-gray-800 truncate">{doc.name || doc.originalName}</h2>
           <div className="flex justify-between items-center text-sm text-gray-500 mt-1">
@@ -78,7 +81,6 @@ const DocCard = ({ doc, onDelete }) => {
           </div>
         </div>
 
-        {/* Actions */}
         <div className="flex justify-between items-center mt-auto pt-4 border-t border-gray-200">
           <div className="flex gap-2">
             <button
@@ -97,38 +99,13 @@ const DocCard = ({ doc, onDelete }) => {
 
           <div className="flex gap-3 text-xl items-center">
             {doc.finalPath && (
-              <button
-                onClick={handleDownload}
-                title="Download PDF"
-                className="hover:text-green-600 transition"
-              >
+              <button onClick={handleDownload} title="Download PDF" className="hover:text-green-600 transition">
                 ⬇️
               </button>
             )}
-
-            <button
-              onClick={() => setShowShareModal(true)}
-              title="Share via Email"
-              className="hover:text-yellow-600 transition"
-            >
-              ✉️
-            </button>
-
-            <button
-              onClick={handleInfo}
-              title="Audit Trail"
-              className="hover:text-blue-600 transition"
-            >
-              ℹ️
-            </button>
-
-            <button
-              onClick={handleDelete}
-              title="Delete"
-              className="hover:text-red-500 transition"
-            >
-              🗑️
-            </button>
+            <button onClick={() => setShowShareModal(true)} title="Share" className="hover:text-yellow-600">✉️</button>
+            <button onClick={handleInfo} title="Audit Trail" className="hover:text-blue-600">ℹ️</button>
+            <button onClick={handleDelete} title="Delete" className="hover:text-red-500">🗑️</button>
           </div>
         </div>
       </div>
@@ -139,16 +116,11 @@ const DocCard = ({ doc, onDelete }) => {
           <div className="bg-white rounded-lg shadow-lg max-w-3xl w-full p-5 relative max-h-[90vh] overflow-auto">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-bold text-gray-800">📄 PDF Preview</h3>
-              <button
-                onClick={() => setShowPreview(false)}
-                className="text-gray-500 hover:text-red-500 text-xl"
-              >
-                ✖
-              </button>
+              <button onClick={() => setShowPreview(false)} className="text-gray-500 hover:text-red-500 text-xl">✖</button>
             </div>
 
             <Document
-              file={`http://localhost:5000/${doc.filePath.replace(/\\/g, '/')}`}
+              file={`${BASE_URL}/${doc.filePath.replace(/\\/g, '/')}`}
               onLoadSuccess={({ numPages }) => setNumPages(numPages)}
             >
               {Array.from(new Array(numPages), (_, i) => (
@@ -168,27 +140,17 @@ const DocCard = ({ doc, onDelete }) => {
       {showShareModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center p-4">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-sm p-6">
-            <h3 className="text-lg font-bold mb-4 text-gray-800">📤 Share Document via Email</h3>
+            <h3 className="text-lg font-bold mb-4 text-gray-800">📤 Share Document</h3>
             <input
               type="email"
               value={shareEmail}
               onChange={(e) => setShareEmail(e.target.value)}
               placeholder="Enter recipient email"
-              className="w-full border px-3 py-2 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border px-3 py-2 rounded mb-4"
             />
             <div className="flex justify-end gap-3">
-              <button
-                onClick={() => setShowShareModal(false)}
-                className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSendShareEmail}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-              >
-                Send
-              </button>
+              <button onClick={() => setShowShareModal(false)} className="px-4 py-2 bg-gray-200 text-gray-800 rounded">Cancel</button>
+              <button onClick={handleSendShareEmail} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Send</button>
             </div>
           </div>
         </div>
@@ -200,18 +162,13 @@ const DocCard = ({ doc, onDelete }) => {
           <div className="bg-white rounded-lg shadow-lg max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-bold text-gray-800">📜 Audit Trail</h3>
-              <button
-                onClick={() => setShowAuditModal(false)}
-                className="text-gray-500 hover:text-red-600 text-xl"
-              >
-                ✖
-              </button>
+              <button onClick={() => setShowAuditModal(false)} className="text-gray-500 hover:text-red-600 text-xl">✖</button>
             </div>
 
             {loadingAudit ? (
               <p className="text-gray-500">Loading...</p>
             ) : auditData.length === 0 ? (
-              <p className="text-gray-500">No signatures found for this document.</p>
+              <p className="text-gray-500">No signatures found.</p>
             ) : (
               <ul className="space-y-4 text-sm">
                 {auditData.map((sig) => (
@@ -233,4 +190,5 @@ const DocCard = ({ doc, onDelete }) => {
 };
 
 export default DocCard;
+
 
